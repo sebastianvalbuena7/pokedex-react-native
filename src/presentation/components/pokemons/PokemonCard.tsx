@@ -1,37 +1,46 @@
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image, Pressable } from "react-native";
 import { Card, Text } from "react-native-paper";
 import { Pokemon } from "../../../domain/entities/pokemon";
 import { FadeInImage } from "../ui/FadeInImage";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { RootStackParams } from "../../navigator/StackNavigator";
 
 interface Props {
     pokemon: Pokemon;
 }
 
 export const PokemonCard = ({ pokemon }: Props) => {
+    const navigation = useNavigation<NavigationProp<RootStackParams>>();
+
     return (
-        <Card style={[styles.cardContainer, { backgroundColor: pokemon.color}]}>
-            <Text style={styles.name} variant="bodyLarge" lineBreakMode="middle">
-                {pokemon.name}
-                {'\n#' + pokemon.id}
-            </Text>
+        <Pressable
+            style={{ flex: 1 }}
+            onPress={() => navigation.navigate('PokemonScreen', { pokemonId: pokemon.id })}
+        >
+            <Card style={[styles.cardContainer, { backgroundColor: pokemon.color }]}>
+                <Text style={styles.name} variant="bodyLarge" lineBreakMode="middle">
+                    {pokemon.name}
+                    {'\n#' + pokemon.id}
+                </Text>
 
-            {/* Pokemon background image */}
-            <View style={styles.pokeballContainer}>
-                <Image
-                    source={require('../../../assets/pokeball-light.png')}
-                    style={styles.pokeball}
+                {/* Pokemon background image */}
+                <View style={styles.pokeballContainer}>
+                    <Image
+                        source={require('../../../assets/pokeball-light.png')}
+                        style={styles.pokeball}
+                    />
+                </View>
+
+                {/* Pokemon Image */}
+                <FadeInImage
+                    uri={pokemon.avatar}
+                    style={styles.pokemonImage}
                 />
-            </View>
 
-            {/* Pokemon Image */}
-            <FadeInImage
-                uri={pokemon.avatar}
-                style={styles.pokemonImage}
-            />
-
-            {/* Type */}
-            <Text style={[styles.name, { marginTop: 35 }]}>{pokemon.types[0]}</Text>
-        </Card>
+                {/* Type */}
+                <Text style={[styles.name, { marginTop: 35 }]}>{pokemon.types[0]}</Text>
+            </Card>
+        </Pressable>
     )
 }
 

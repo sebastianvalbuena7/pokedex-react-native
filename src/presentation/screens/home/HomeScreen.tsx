@@ -1,6 +1,6 @@
 import { FlatList, StyleSheet, View } from "react-native"
-import { ActivityIndicator, Button, Text } from "react-native-paper"
-import { useQuery } from "@tanstack/react-query"
+import { Text } from "react-native-paper"
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
 import { PokeballBg } from "../../components/ui/PokeballBg";
 import { getPokemons } from "../../../actions";
 import { Pokemon } from "../../../domain/entities/pokemon";
@@ -10,11 +10,29 @@ import { PokemonCard } from "../../components/pokemons/PokemonCard";
 
 export const HomeScreen = () => {
     const { top } = useSafeAreaInsets();
+    const queryClient = useQueryClient();
 
-    const { isLoading, data: pokemons = [] } = useQuery({
-        queryKey: ['pokemons'],
-        queryFn: () => getPokemons(0),
-        staleTime: 1000 * 60 * 60
+    // ! Peticiones tipicas 
+    // const { isLoading, data: pokemons = [] } = useQuery({
+    //     queryKey: ['pokemons'],
+    //     queryFn: () => getPokemons(0),
+    //     staleTime: 1000 * 60 * 60
+    // });
+
+    const { isLoading, data, fetchNextPage } = useInfiniteQuery({
+        queryKey: ['pokemons', 'infinite'],
+        initialPageParam: 0,
+        queryFn: async params => {
+            const pokemons = await getPokemons(params.pageParam);
+            pokemons.forEach(pokemon => {
+                queryClient.setQueryData(['pokemon', pokemon.id], pokemon);
+            });
+            return pokemons;
+        },
+        // ! Peticion normal
+        // queryFn: params => getPokemons(params.pageParam),
+        getNextPageParam: (lastPage, pages) => pages.length,
+        staleTime: 1000 * 60 * 60, // 60 minutos
     });
 
     return (
@@ -22,7 +40,7 @@ export const HomeScreen = () => {
             <PokeballBg style={styles.imgPosition} />
 
             <FlatList
-                data={pokemons}
+                data={data?.pages.flat() ?? []}
                 keyExtractor={(pokemon: Pokemon) => `${pokemon.id}`}
                 numColumns={2}
                 ListHeaderComponent={() => (
@@ -32,6 +50,9 @@ export const HomeScreen = () => {
                     paddingTop: top + 20
                 }}
                 renderItem={({ item }) => <PokemonCard pokemon={item} />}
+                onEndReachedThreshold={0.6}
+                onEndReached={() => fetchNextPage()}
+                showsHorizontalScrollIndicator={false}
             />
         </View>
     )
