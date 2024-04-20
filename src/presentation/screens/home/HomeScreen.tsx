@@ -44,10 +44,10 @@ export const HomeScreen = () => {
                 keyExtractor={(pokemon: Pokemon) => `${pokemon.id}`}
                 numColumns={2}
                 ListHeaderComponent={() => (
-                    <Text variant="displayMedium">Pokedex</Text>
+                    <Text variant="displayMedium" style={{marginBottom: 33}}>Pokedex</Text>
                 )}
                 style={{
-                    paddingTop: top + 20
+                    paddingTop: top + 30
                 }}
                 renderItem={({ item }) => <PokemonCard pokemon={item} />}
                 onEndReachedThreshold={0.6}
