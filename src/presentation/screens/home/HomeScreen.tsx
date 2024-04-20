@@ -1,16 +1,21 @@
 import { FlatList, StyleSheet, View } from "react-native"
-import { Text } from "react-native-paper"
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
-import { PokeballBg } from "../../components/ui/PokeballBg";
-import { getPokemons } from "../../../actions";
-import { Pokemon } from "../../../domain/entities/pokemon";
-import { globalTheme } from "../../../config/theme/global-theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StackScreenProps } from "@react-navigation/stack";
+import { FAB, Text, useTheme } from "react-native-paper"
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
+import { RootStackParams } from "../../navigator/StackNavigator";
+import { getPokemons } from "../../../actions";
+import { globalTheme } from "../../../config/theme/global-theme";
+import { Pokemon } from "../../../domain/entities/pokemon";
+import { PokeballBg } from "../../components/ui/PokeballBg";
 import { PokemonCard } from "../../components/pokemons/PokemonCard";
 
-export const HomeScreen = () => {
+interface Props extends StackScreenProps<RootStackParams, 'HomeScreen'> { };
+
+export const HomeScreen = ({ navigation }: Props) => {
     const { top } = useSafeAreaInsets();
     const queryClient = useQueryClient();
+    const theme = useTheme();
 
     // ! Peticiones tipicas 
     // const { isLoading, data: pokemons = [] } = useQuery({
@@ -44,7 +49,7 @@ export const HomeScreen = () => {
                 keyExtractor={(pokemon: Pokemon) => `${pokemon.id}`}
                 numColumns={2}
                 ListHeaderComponent={() => (
-                    <Text variant="displayMedium" style={{marginBottom: 33}}>Pokedex</Text>
+                    <Text variant="displayMedium" style={{ marginBottom: 33 }}>Pokedex</Text>
                 )}
                 style={{
                     paddingTop: top + 30
@@ -53,6 +58,14 @@ export const HomeScreen = () => {
                 onEndReachedThreshold={0.6}
                 onEndReached={() => fetchNextPage()}
                 showsHorizontalScrollIndicator={false}
+            />
+
+            <FAB
+                icon={'card-search-outline'}
+                style={[globalTheme.fab, { backgroundColor: theme.colors.primary }]}
+                mode="elevated"
+                onPress={() => navigation.push('SearchScreen')}
+                color={theme.dark ? 'black' : 'white'}
             />
         </View>
     )
